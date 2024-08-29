@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { metrics } from "../../Datasets/metricsData";
 
 interface MetricsState {
   totalUsers: number;
@@ -8,13 +9,7 @@ interface MetricsState {
   topArtist: string;
 }
 
-const initialState: MetricsState = {
-  totalUsers: 10000,
-  activeUsers: 7500,
-  totalStreams: 500000,
-  revenue: 120000,
-  topArtist: "Artist Name",
-};
+const initialState: MetricsState = metrics;
 
 const metricsSlice = createSlice({
   name: "metrics",
