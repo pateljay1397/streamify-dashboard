@@ -1,31 +1,110 @@
-import React from "react";
-import { Table } from "react-bootstrap";
+import React, { useState } from "react";
+import { Table, Form } from "react-bootstrap";
 import { recentStreamsData } from "../Datasets/recentStreamsData";
 
+interface StreamData {
+  songName: string;
+  artist: string;
+  dateStreamed: string;
+  streamCount: number;
+  userId: string;
+}
+
 const DataTable: React.FC = () => {
+  const [data, setData] = useState<StreamData[]>(recentStreamsData);
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof StreamData;
+    direction: string;
+  } | null>(null);
+  const [filter, setFilter] = useState({ artist: "", songName: "" });
+
+  const sortedData = React.useMemo(() => {
+    let sortableData = [...data];
+    if (sortConfig !== null) {
+      sortableData.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "ascending" ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "ascending" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableData;
+  }, [data, sortConfig]);
+
+  const requestSort = (key: keyof StreamData) => {
+    let direction = "ascending";
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "ascending"
+    ) {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilter({ ...filter, [name]: value });
+  };
+
+  const filteredData = sortedData.filter((item) => {
+    return (
+      item.artist.toLowerCase().includes(filter.artist.toLowerCase()) &&
+      item.songName.toLowerCase().includes(filter.songName.toLowerCase())
+    );
+  });
+
   return (
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>Song Name</th>
-          <th>Artist</th>
-          <th>Date Streamed</th>
-          <th>Stream Count</th>
-          <th>User ID</th>
-        </tr>
-      </thead>
-      <tbody>
-        {recentStreamsData.map((row, index) => (
-          <tr key={index}>
-            <td>{row.songName}</td>
-            <td>{row.artist}</td>
-            <td>{row.dateStreamed}</td>
-            <td>{row.streamCount}</td>
-            <td>{row.userId}</td>
+    <div>
+      <Form className="mb-3">
+        <Form.Group controlId="filterArtist">
+          <Form.Label>Filter by Artist</Form.Label>
+          <Form.Control
+            type="text"
+            name="artist"
+            value={filter.artist}
+            onChange={handleFilterChange}
+            placeholder="Enter artist name"
+          />
+        </Form.Group>
+        <Form.Group controlId="filterSongName">
+          <Form.Label>Filter by Song Name</Form.Label>
+          <Form.Control
+            type="text"
+            name="songName"
+            value={filter.songName}
+            onChange={handleFilterChange}
+            placeholder="Enter song name"
+          />
+        </Form.Group>
+      </Form>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th onClick={() => requestSort("songName")}>Song Name</th>
+            <th onClick={() => requestSort("artist")}>Artist</th>
+            <th onClick={() => requestSort("dateStreamed")}>Date Streamed</th>
+            <th onClick={() => requestSort("streamCount")}>Stream Count</th>
+            <th>User ID</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {filteredData.map((row, index) => (
+            <tr key={index}>
+              <td>{row.songName}</td>
+              <td>{row.artist}</td>
+              <td>{row.dateStreamed}</td>
+              <td>{row.streamCount}</td>
+              <td>{row.userId}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
   );
 };
 
