@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Form } from "react-bootstrap";
+import { Table, Form, Row, Col } from "react-bootstrap";
 import { recentStreamsData } from "../Datasets/recentStreamsData";
 
 interface StreamData {
@@ -46,6 +46,15 @@ const DataTable: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
+  const getSortIcon = (key: keyof StreamData) => {
+    if (!sortConfig) return null;
+    if (sortConfig.key !== key) return null;
+    if (sortConfig.direction === "ascending") {
+      return <span>↑</span>;
+    }
+    return <span>↓</span>;
+  };
+
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilter({ ...filter, [name]: value });
@@ -61,34 +70,49 @@ const DataTable: React.FC = () => {
   return (
     <div>
       <Form className="mb-3">
-        <Form.Group controlId="filterArtist">
-          <Form.Label>Filter by Artist</Form.Label>
-          <Form.Control
-            type="text"
-            name="artist"
-            value={filter.artist}
-            onChange={handleFilterChange}
-            placeholder="Enter artist name"
-          />
-        </Form.Group>
-        <Form.Group controlId="filterSongName">
-          <Form.Label>Filter by Song Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="songName"
-            value={filter.songName}
-            onChange={handleFilterChange}
-            placeholder="Enter song name"
-          />
-        </Form.Group>
+        <Row>
+          <Col>
+            <Form.Group controlId="filterArtist">
+              <Form.Label>Filter by Artist</Form.Label>
+              <Form.Control
+                type="text"
+                name="artist"
+                value={filter.artist}
+                onChange={handleFilterChange}
+                placeholder="Enter artist name"
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="filterSongName">
+              <Form.Label>Filter by Song Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="songName"
+                value={filter.songName}
+                onChange={handleFilterChange}
+                placeholder="Enter song name"
+              />
+            </Form.Group>
+          </Col>
+        </Row>
       </Form>
+
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th onClick={() => requestSort("songName")}>Song Name</th>
-            <th onClick={() => requestSort("artist")}>Artist</th>
-            <th onClick={() => requestSort("dateStreamed")}>Date Streamed</th>
-            <th onClick={() => requestSort("streamCount")}>Stream Count</th>
+            <th onClick={() => requestSort("songName")}>
+              Song Name {getSortIcon("songName")}
+            </th>
+            <th onClick={() => requestSort("artist")}>
+              Artist {getSortIcon("artist")}
+            </th>
+            <th onClick={() => requestSort("dateStreamed")}>
+              Date Streamed {getSortIcon("dateStreamed")}
+            </th>
+            <th onClick={() => requestSort("streamCount")}>
+              Stream Count {getSortIcon("streamCount")}
+            </th>
             <th>User ID</th>
           </tr>
         </thead>
